@@ -46,6 +46,14 @@ HttpConnection::~HttpConnection() {
 	}
 }
 
+void HttpConnection::clear()
+{
+	if (easy_handle_) {
+		curl_easy_cleanup(easy_handle_);
+		easy_handle_ = NULL;
+	}
+}
+
 bool HttpConnection::Init(const char* url) {
   easy_handle_ = curl_easy_init();
   if (!easy_handle_) {
@@ -72,6 +80,9 @@ void HttpConnection::SetProgressCallBack(void* ptr, ProgressFunction progress_fu
     setCurlOption(CURLOPT_PROGRESSDATA, ptr);
 }
 
+void HttpConnection::setCompleteCallBack(const std::function<void()>& func){
+    this->_complteFunc = func;
+}
 
 bool HttpConnection::PerformGet() {
   CURLcode code = curl_easy_perform(easy_handle_);
@@ -80,7 +91,9 @@ bool HttpConnection::PerformGet() {
     ReportCurlErrorCode(code);
     return false;
   }
-
+  if(_complteFunc!=nullptr){
+	  this->_complteFunc();
+  }
   code = curl_easy_getinfo(easy_handle_, CURLINFO_RESPONSE_CODE, &response_code_);
   if (code != CURLE_OK) {
     ReportCurlErrorCode(code);

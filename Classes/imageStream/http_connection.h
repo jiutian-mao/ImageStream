@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "curl/curl.h"
-
+#include <functional>
 
 class HttpConnection {
  public:
@@ -21,7 +21,10 @@ class HttpConnection {
   bool Init(const char*url);
   bool PerformGet();
   bool PerformPost(const char* post_data, int post_data_size, int* response_code);
- 
+  void clear();
+
+  void setCompleteCallBack(const std::function<void()>& func);
+
     typedef size_t (*WrietFunctionType)(void *ptr, size_t size, size_t nmemb, void *stream);
     typedef int (*ProgressFunction)(void *ptr, double totalToDownload, double nowDownloaded, double totalToUpLoad, double nowUpLoaded);
 
@@ -47,6 +50,7 @@ class HttpConnection {
   char error_bufffer[CURL_ERROR_SIZE];
   std::vector<char> receiver_buffer;
   int response_code_;
+  std::function<void()> _complteFunc;
 };
 
 #endif //COCOS2D_TESTS_HTTP_HTTPCONNECTION_H_

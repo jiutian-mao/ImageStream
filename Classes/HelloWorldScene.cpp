@@ -65,19 +65,12 @@ bool HelloWorld::init()
     // add the label as a child to this layer
     this->addChild(label, 1);
     
-    WebSprite* sprite = WebSprite::createWithFileUrl("http://www.zzy1314.com/images/t2.png");//http://i.mmcdn.cn/simba/img/TB1G0mHMVXXXXa6aFXXSutbFXXX.jpg
-    // add "HelloWorld" splash screen"
-    //auto sprite = Sprite::createWithTexture(texture);
-    // position the sprite on the center of the screen
-    sprite->setPosition(Point(150, visibleSize.height /2));
+    WebSprite* sprite = WebSprite::create();
+    sprite->setURL("http://f.hiphotos.baidu.com/zhidao/pic/item/ac6eddc451da81cb84c2aebe5666d01609243198.jpg");
+    sprite->getHttpPic(Size(500,500));
+    
+    sprite->setPosition(Point(visibleSize.width/2, visibleSize.height/2));
     this->addChild(sprite);
-//    WebSprite* sprite2 = WebSprite::createWithFileUrl("future.png");
-    // add "HelloWorld" splash screen"
-    //auto sprite = Sprite::createWithTexture(texture);
-    // position the sprite on the center of the screen
-//    sprite2->setPosition(Point(400, visibleSize.height / 2));
-    // add the sprite as a child to this layer
-//    this->addChild(sprite2);
     
     return true;
 }

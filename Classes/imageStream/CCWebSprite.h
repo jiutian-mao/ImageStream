@@ -15,7 +15,6 @@
 
 #include "cocos2d.h"
 
-
 class HttpConnection;
 namespace util {
 class PNGCodec;
@@ -25,15 +24,22 @@ namespace cocos2d {
 class InterlacedPngImage;
 class WebSprite : public cocos2d::Sprite {
  public:
-  WebSprite();
-  virtual ~WebSprite();
+	WebSprite();
+	virtual ~WebSprite();
   
-  static WebSprite* create();
-  static WebSprite* createWithFileUrl(const char* file_url);
+	static WebSprite* create();
+	static WebSprite* createWithFileUrl(const char* file_url);
   
+	void setURL(std::string url);
+	void getHttpPic(cocos2d::Size size_);				//获取网络图片
+
+	void clearPic();
+
+protected:
   bool initWithFileUrl(const char* file_url);
 
  private:
+
 	 class DataBridge {
 	  public:
 		 // Callback function used by libcurl for collect response data
@@ -46,13 +52,18 @@ class WebSprite : public cocos2d::Sprite {
 	
 	friend class DataBridge;
 
+
+
     void UpdateTexture();
 	void reciverData(unsigned char* data, size_t data_size);
 	void readHeaderComplete();
     void readRowComplete(int pass);
     void readAllComplete();
+    void saveURLPic();
+    
 	bool initWithRemoteFile();
 	bool isRemotoeFileUrl(const char *file_url);
+    
 
 private:
     std::shared_ptr<HttpConnection> http_connection_;
@@ -60,8 +71,10 @@ private:
     InterlacedPngImage* interlaced_png_image_buff_;
     std::string file_url_;
     int code_pass_;
+    
 	Image::Format format;
-
+	std::string m_picName;			//网络图片的名字
+    Size _size;
 private:
   CC_DISALLOW_COPY_AND_ASSIGN(WebSprite)
 };

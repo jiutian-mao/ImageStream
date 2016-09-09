@@ -1,11 +1,3 @@
-//
-//  CCInterlacedPngImage.cpp
-//  cocos2d_tests
-//
-//  Created by sachin on 5/11/14.
-//
-//
-
 #include "CCInterlacedPngImage.h"
 #include <future>
 
@@ -66,65 +58,21 @@ struct GimpImage{
 
 } //namespace anonymous
 
-InterlacedPngImage::InterlacedPngImage():
-	_updateTexture(nullptr)
-	//png_coder_(std::make_shared<util::PNGCodec>()),
-	
+    InterlacedPngImage::InterlacedPngImage():
+    _complteFunc(nullptr)
 {
 	
 }
-
-bool InterlacedPngImage::initWithFilePath(const char *file_path) {
-//  if (isRemoteFilePath(file_path)) {
-//    initWithRemoteFilePath(file_path);
-//    return true;
-//  }
-  bool ret = false;
-  _filePath = cocos2d::FileUtils::getInstance()->fullPathForFilename(file_path);
-  
-#ifdef EMSCRIPTEN
-  // Emscripten includes a re-implementation of SDL that uses HTML5 canvas
-  // operations underneath. Consequently, loading images via IMG_Load (an SDL
-  // API) will be a lot faster than running libpng et al as compiled with
-  // Emscripten.
-  SDL_Surface *iSurf = IMG_Load(fullPath.c_str());
-  
-  int size = 4 * (iSurf->w * iSurf->h);
-  ret = initWithRawData((const unsigned char*)iSurf->pixels, size, iSurf->w, iSurf->h, 8, true);
-  
-  unsigned int *tmp = (unsigned int *)_data;
-  int nrPixels = iSurf->w * iSurf->h;
-  for(int i = 0; i < nrPixels; i++)
-  {
-    unsigned char *p = _data + i * 4;
-    tmp[i] = CC_RGB_PREMULTIPLY_ALPHA( p[0], p[1], p[2], p[3] );
-  }
-  
-  SDL_FreeSurface(iSurf);
-#else
-  cocos2d::Data data = cocos2d::FileUtils::getInstance()->getDataFromFile(_filePath);
-  
-  if (!data.isNull())
-  {
-    ret = initWithPngData(data.getBytes(), data.getSize());
-  }
-#endif // EMSCRIPTEN
-  
-  return ret;
-}
-
-bool InterlacedPngImage::initWithFilePath(const char *local_file_path, const char *remote_file_path) {
-  return true;
-}
-
-bool InterlacedPngImage::initWithPngData(const unsigned char * data, ssize_t dataLen) {
-  Image::initWithRawData(null_content_image.pixel_data, null_content_image.width * null_content_image.height * null_content_image.bytes_per_pixel, null_content_image.width, null_content_image.height,8);
-  return true;
+    
+InterlacedPngImage::~InterlacedPngImage()
+{
+    this->_complteFunc = nullptr;
+    this->buffer.clear();
 }
 
 void InterlacedPngImage::setImageHeader(size_t width, size_t height, int image_color_type, int out_channel) {
-	_width = width;
-  _height = height;
+    _width = width;
+    _height = height;
 	png_uint_32 color_type = (png_uint_32)image_color_type;
 	switch (color_type)
 	{
@@ -156,9 +104,8 @@ void InterlacedPngImage::setImageBodyData(char* data, size_t data_size) {
 	memcpy(_data, data, _dataLen);
 }
 
-void InterlacedPngImage::setUpdateCallBack(const std::function<void()>& func)
-{
-	this->_updateTexture = func;
+void InterlacedPngImage::setCompleteCallBack(const std::function<void()>& func){
+    this->_complteFunc = func;
 }
 
 Image::Format InterlacedPngImage::getTextureFormat(unsigned char* data, size_t data_size)
@@ -183,22 +130,7 @@ int InterlacedPngImage::OnProgress(void *ptr, double totalToDownload, double now
         web_sprite->buffer.reserve((long)totalToDownload);
     }
     
-    if(fabs(totalToDownload - nowDownloaded) < 0.00000001)
-    {
-        if(web_sprite->buffer.size() > 0){
-            web_sprite->buffer.clear();
-        }
-    }
-    
     return 0;
-}
-
-void InterlacedPngImage::updateTexture() {
-	//Director::getInstance()->getScheduler()->performFunctionInCocosThread([&,this]{
-	//	if(this->_updateTexture!=nullptr){
-	//		this->_updateTexture();
-	//	}
-	//});
 }
 
 bool InterlacedPngImage::DecodeJPG(unsigned char* data, size_t dataLen)
